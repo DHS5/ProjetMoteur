@@ -3,10 +3,13 @@
 
 #include "framework.h"
 #include "ProjetMoteur.h"
+
+#include <cassert>
 #include <d3d12.h>
 #include <wrl.h>
 #include <dxgi.h>
 #include <dxgi1_4.h>
+#include <stdexcept>
 #include <string>
 
 #pragma comment(lib, "d3d12.lib")
@@ -27,10 +30,12 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+void ThrowIfFailed(HRESULT hr);
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+                      _In_opt_ HINSTANCE hPrevInstance,
+                      _In_ LPWSTR    lpCmdLine,
+                      _In_ int       nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
@@ -42,6 +47,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     ComPtr<IDXGIFactory4> mdxgiFactory;
     CreateDXGIFactory1(IID_PPV_ARGS(&mdxgiFactory));
+
+    
 
     ComPtr<IDXGIAdapter1> adapter;
 
@@ -65,6 +72,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
     UINT mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(
         D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+    
+
+    DXGI_FORMAT mBackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+    D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msQualityLevels;
+    msQualityLevels.Format = mBackBufferFormat;
+    msQualityLevels.SampleCount = 4;
+    msQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
+    msQualityLevels.NumQualityLevels = 0;
+    ThrowIfFailed(md3dDevice->CheckFeatureSupport(
+     D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
+     &msQualityLevels,
+     sizeof(msQualityLevels)));
+    UINT m4xMsaaQuality = msQualityLevels.NumQualityLevels;
+    assert(m4xMsaaQuality > 0 && "Unexpected MSAA quality level.");
 
 
     // Initialise les chaînes globales
@@ -217,4 +239,12 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+void ThrowIfFailed(HRESULT hr)
+{
+    if (FAILED(hr))
+    {
+        throw std::runtime_error("HRESULT failed.");
+    }
 }
