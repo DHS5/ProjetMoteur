@@ -5,6 +5,8 @@
 #include "ProjetMoteur.h"
 #include <d3d12.h>
 #include <wrl.h>
+#include <dxgi.h>
+#include <dxgi1_4.h>
 
 #define MAX_LOADSTRING 100
 
@@ -30,7 +32,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // TODO: Placez le code ici.
     Microsoft::WRL::ComPtr<ID3D12RootSignature> mRootSignature;
     Microsoft::WRL::ComPtr<ID3D12Device> md3dDevice;
-    HRESULT hardwareResult = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&md3dDevice));
+    D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&md3dDevice));
+
+    Microsoft::WRL::ComPtr<IDXGIFactory4> mdxgiFactory;
+    CreateDXGIFactory1(IID_PPV_ARGS(&mdxgiFactory));
 
     // Initialise les chaînes globales
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
