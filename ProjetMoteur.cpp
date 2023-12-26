@@ -20,22 +20,22 @@ using namespace Microsoft::WRL;
 #define MAX_LOADSTRING 100
 
 // Variables globales :
-HINSTANCE hInst;                                // instance actuelle
-WCHAR szTitle[MAX_LOADSTRING];                  // Texte de la barre de titre
-WCHAR szWindowClass[MAX_LOADSTRING];            // nom de la classe de fenêtre principale
+HINSTANCE hInst; // instance actuelle
+WCHAR szTitle[MAX_LOADSTRING]; // Texte de la barre de titre
+WCHAR szWindowClass[MAX_LOADSTRING]; // nom de la classe de fenêtre principale
 
 // Déclarations anticipées des fonctions incluses dans ce module de code :
-ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+ATOM MyRegisterClass(HINSTANCE hInstance);
+BOOL InitInstance(HINSTANCE, int);
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 void ThrowIfFailed(HRESULT hr);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                       _In_opt_ HINSTANCE hPrevInstance,
-                      _In_ LPWSTR    lpCmdLine,
-                      _In_ int       nCmdShow)
+                      _In_ LPWSTR lpCmdLine,
+                      _In_ int nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
@@ -48,11 +48,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     ComPtr<IDXGIFactory4> mdxgiFactory;
     CreateDXGIFactory1(IID_PPV_ARGS(&mdxgiFactory));
 
-    
 
     ComPtr<IDXGIAdapter1> adapter;
 
-    for (UINT adapterIndex = 0; mdxgiFactory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND; ++adapterIndex) {
+    for (UINT adapterIndex = 0; mdxgiFactory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND; ++
+         adapterIndex)
+    {
         DXGI_ADAPTER_DESC1 desc;
         adapter->GetDesc1(&desc);
 
@@ -73,7 +74,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UINT mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(
         D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-    
 
     DXGI_FORMAT mBackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
     D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msQualityLevels;
@@ -82,11 +82,37 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     msQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
     msQualityLevels.NumQualityLevels = 0;
     ThrowIfFailed(md3dDevice->CheckFeatureSupport(
-     D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
-     &msQualityLevels,
-     sizeof(msQualityLevels)));
+        D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
+        &msQualityLevels,
+        sizeof(msQualityLevels)));
     UINT m4xMsaaQuality = msQualityLevels.NumQualityLevels;
     assert(m4xMsaaQuality > 0 && "Unexpected MSAA quality level.");
+
+    ComPtr<ID3D12CommandQueue> mCommandQueue;
+    ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;
+    ComPtr<ID3D12GraphicsCommandList> mCommandList;
+    
+    D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+    queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+    queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+    ThrowIfFailed(md3dDevice->CreateCommandQueue(
+        &queueDesc, IID_PPV_ARGS(&mCommandQueue)));
+    ThrowIfFailed(md3dDevice->CreateCommandAllocator(
+        D3D12_COMMAND_LIST_TYPE_DIRECT,
+        IID_PPV_ARGS(mDirectCmdListAlloc.GetAddressOf())));
+    ThrowIfFailed(md3dDevice->CreateCommandList(
+        0,
+        D3D12_COMMAND_LIST_TYPE_DIRECT,
+        mDirectCmdListAlloc.Get(), // Associated command allocator
+        nullptr, // Initial PipelineStateObject
+        IID_PPV_ARGS(mCommandList.GetAddressOf())));
+    // Start off in a closed state. This is because the first time we
+    // refer to the command list we will Reset it, and it needs to be
+    // closed before calling Reset.
+    mCommandList->Close();
+
+    
+
 
 
     // Initialise les chaînes globales
@@ -95,7 +121,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MyRegisterClass(hInstance);
 
     // Effectue l'initialisation de l'application :
-    if (!InitInstance (hInstance, nCmdShow))
+    if (!InitInstance(hInstance, nCmdShow))
     {
         return FALSE;
     }
@@ -114,9 +140,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
-    return (int) msg.wParam;
+    return (int)msg.wParam;
 }
-
 
 
 //
@@ -130,17 +155,17 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
     wcex.cbSize = sizeof(WNDCLASSEX);
 
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PROJETMOTEUR));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PROJETMOTEUR);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PROJETMOTEUR));
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_PROJETMOTEUR);
+    wcex.lpszClassName = szWindowClass;
+    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
 }
@@ -157,20 +182,20 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // Stocke le handle d'instance dans la variable globale
+    hInst = hInstance; // Stocke le handle d'instance dans la variable globale
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+                              CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+    if (!hWnd)
+    {
+        return FALSE;
+    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
 
-   return TRUE;
+    return TRUE;
 }
 
 //
