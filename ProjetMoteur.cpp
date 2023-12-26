@@ -56,6 +56,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
     // Inictialise les chaînes globales
+    ComPtr<ID3D12Fence> mFence;
+    md3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence));
+
+    UINT mRtvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(
+        D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+    UINT mDsvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(
+        D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+    UINT mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(
+        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+
+    // Initialise les chaînes globales
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_PROJETMOTEUR, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
