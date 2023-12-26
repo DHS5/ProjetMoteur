@@ -8,6 +8,9 @@
 #include <dxgi.h>
 #include <dxgi1_4.h>
 
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+
 #define MAX_LOADSTRING 100
 
 // Variables globales :
