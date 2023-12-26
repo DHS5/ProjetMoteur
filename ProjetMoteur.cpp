@@ -7,6 +7,7 @@
 #include <wrl.h>
 #include <dxgi.h>
 #include <dxgi1_4.h>
+#include <string>
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -42,7 +43,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     ComPtr<IDXGIFactory4> mdxgiFactory;
     CreateDXGIFactory1(IID_PPV_ARGS(&mdxgiFactory));
 
-    // Initialise les chaînes globales
+    ComPtr<IDXGIAdapter1> adapter;
+
+    for (UINT adapterIndex = 0; mdxgiFactory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND; ++adapterIndex) {
+        DXGI_ADAPTER_DESC1 desc;
+        adapter->GetDesc1(&desc);
+
+        std::wstring text = L"***Adapter: ";
+        text += desc.Description;
+        text += L"\n";
+        OutputDebugString(text.c_str());
+    }
+
+    // Inictialise les chaînes globales
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_PROJETMOTEUR, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
