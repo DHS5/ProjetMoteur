@@ -11,6 +11,8 @@
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 
+using namespace Microsoft::WRL;
+
 #define MAX_LOADSTRING 100
 
 // Variables globales :
@@ -33,11 +35,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Placez le code ici.
-    Microsoft::WRL::ComPtr<ID3D12RootSignature> mRootSignature;
-    Microsoft::WRL::ComPtr<ID3D12Device> md3dDevice;
+    ComPtr<ID3D12RootSignature> mRootSignature;
+    ComPtr<ID3D12Device> md3dDevice;
     D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&md3dDevice));
 
-    Microsoft::WRL::ComPtr<IDXGIFactory4> mdxgiFactory;
+    ComPtr<IDXGIFactory4> mdxgiFactory;
     CreateDXGIFactory1(IID_PPV_ARGS(&mdxgiFactory));
 
     // Initialise les chaînes globales
