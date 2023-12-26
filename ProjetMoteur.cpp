@@ -3,6 +3,8 @@
 
 #include "framework.h"
 #include "ProjetMoteur.h"
+#include <d3d12.h>
+#include <wrl.h>
 
 #define MAX_LOADSTRING 100
 
@@ -26,6 +28,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Placez le code ici.
+    //HRESULT hardwareResult = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&md3dDevice));
 
     // Initialise les chaînes globales
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
